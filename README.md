@@ -3,6 +3,9 @@ The Asian Calculator is a Calculator that is an exact Graphing Calculator Replic
 
 The Asian Calculator can also launch unblocked and secret browsers in an about:blank, the functions of so are listed below.
 
+# PLEASE CHECK THE LISENCE BEFORE FORKING, NOT DOING SO WILL GET YOU DMCA'd I HAVE AN ALL RIGHTS RESERVED FILE ON IT.
+
+
 # FUNCTIONS
 1. 2nd + Enter = GN-Math in a About Blank
 2. 2nd + Clear = Doge UB in a About Blank
