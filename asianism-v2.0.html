@@ -17,9 +17,8 @@
             overflow: hidden;
         }
 
-        
         .calculator {
-            background: #2b569e; /* TI Blue I FOUND IT HAHAHAHAHHAHAHHAHAHA */
+            background: #2b569e; /* TI Blue */
             width: 340px;
             padding: 20px;
             border-radius: 40px 40px 60px 60px;
@@ -56,6 +55,7 @@
             text-align: right;
             color: #222;
             opacity: 0.7;
+            min-height: 1.2em;
         }
 
         .screen-current {
@@ -66,7 +66,6 @@
             word-break: break-all;
         }
 
-        
         #graph-canvas {
             position: absolute;
             top: 0;
@@ -101,7 +100,7 @@
             height: 35px;
             border-radius: 6px;
             border: none;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -111,6 +110,7 @@
             transition: all 0.1s;
             color: white;
             text-transform: uppercase;
+            user-select: none;
         }
 
         .btn:active {
@@ -118,10 +118,8 @@
             box-shadow: 0 1px 0 #152d52;
         }
 
-        
         .btn-gray { background: #555; box-shadow: 0 3px 0 #333; }
         .btn-dark-gray { background: #333; box-shadow: 0 3px 0 #111; }
-        .btn-light-gray { background: #d1d5db; color: black; box-shadow: 0 3px 0 #9ca3af; }
         .btn-blue-func { background: #4b78c8; box-shadow: 0 3px 0 #2b569e; }
         
         .btn-2nd { 
@@ -152,12 +150,27 @@
             text-align: center;
             padding: 20px;
         }
+
+        .message-toast {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 200;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="calculator">
-        <!-- Hidden shit -->
+        <div id="message-toast" class="message-toast">Pop-up Blocked!</div>
+        
         <div id="launch-overlay">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
             <p id="overlay-text" class="text-lg font-bold">INITIALIZING...</p>
@@ -181,45 +194,46 @@
         </div>
 
         <div class="keypad">
-            <!-- top key thingys -->
+            <!-- Top Function Keys -->
             <button class="btn btn-blue-func" onclick="showYMenu()">y=</button>
             <button class="btn btn-blue-func" onclick="clearScreen()">window</button>
             <button class="btn btn-blue-func" onclick="clearScreen()">zoom</button>
             <button class="btn btn-blue-func" onclick="clearScreen()">trace</button>
             <button class="btn btn-blue-func" onclick="showGraph()">graph</button>
 
-            <!-- 2nd main function thing asian please lock the fuck in -->
+            <!-- 2nd, Mode, Del -->
             <button id="btn-2nd" class="btn btn-2nd" onclick="toggle2nd()">2nd</button>
             <button class="btn btn-dark-gray" onclick="clearScreen()">mode</button>
-            <button class="btn btn-dark-gray" onclick="deleteChar()">del</button>
+            <button class="btn btn-dark-gray" onclick="handleDelete()">del</button>
             <div class="col-span-2"></div>
 
-            <!-- alpha beta kappa gamma ahh -->
+            <!-- Alpha, Variable, Stat -->
             <button class="btn btn-alpha" onclick="clearScreen()">alpha</button>
             <button class="btn btn-dark-gray" onclick="append('X')">X,T,θ,n</button>
             <button class="btn btn-dark-gray" onclick="clearScreen()">stat</button>
             <div class="col-span-2"></div>
 
-            <!-- methemetics -->
+            <!-- Math Menu Keys -->
             <button class="btn btn-dark-gray" onclick="clearScreen()">math</button>
             <button class="btn btn-dark-gray" onclick="clearScreen()">apps</button>
             <button class="btn btn-dark-gray" onclick="clearScreen()">prgm</button>
             <button class="btn btn-dark-gray" onclick="clearScreen()">vars</button>
             <button class="btn btn-dark-gray" onclick="handleClear()">clear</button>
 
-            <!-- numberos -->
+            <!-- Trig and Powers -->
             <button class="btn btn-dark-gray" onclick="clearScreen()">x⁻¹</button>
             <button class="btn btn-dark-gray" onclick="append('sin(')">sin</button>
             <button class="btn btn-dark-gray" onclick="append('cos(')">cos</button>
             <button class="btn btn-dark-gray" onclick="append('tan(')">tan</button>
             <button class="btn btn-dark-gray" onclick="append('^')">^</button>
 
-            <button class="btn btn-dark-gray" onclick="append('^2')">x²</button>
+            <button class="btn btn-dark-gray" onclick="append('**2')">x²</button>
             <button class="btn btn-dark-gray" onclick="append('(')">(</button>
             <button class="btn btn-dark-gray" onclick="append(')')">)</button>
             <button class="btn btn-dark-gray" onclick="append('/')">÷</button>
             <button class="btn btn-dark-gray" onclick="clearScreen()">log</button>
 
+            <!-- Numbers -->
             <button class="btn btn-num" onclick="append('7')">7</button>
             <button class="btn btn-num" onclick="append('8')">8</button>
             <button class="btn btn-num" onclick="append('9')">9</button>
@@ -248,7 +262,7 @@
             <div class="opacity-40 text-[8px] text-white">
                 TI-84 Plus CE Python
             </div>
-            <a href="https://www.youtube.com/@Offensive-Asian" target="_blank" class="text-white opacity-60 text-[10px] hover:opacity-100 transition-opacity no-underline font-bold">
+            <a href="#" class="text-white opacity-60 text-[10px] hover:opacity-100 transition-opacity no-underline font-bold">
                 Made by Asian Industries
             </a>
         </div>
@@ -258,7 +272,7 @@
         let currentInput = "0";
         let yEquation = "";
         let is2ndActive = false;
-        let currentMode = "calc"; // calc and graphing shit idfk
+        let currentMode = "calc"; 
 
         const screenCurrent = document.getElementById('screen-current');
         const screenHistory = document.getElementById('screen-history');
@@ -269,7 +283,14 @@
         const overlay = document.getElementById('launch-overlay');
         const overlayText = document.getElementById('overlay-text');
         const btn2nd = document.getElementById('btn-2nd');
+        const toast = document.getElementById('message-toast');
         const ctx = canvas.getContext('2d');
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
 
         function append(val) {
             if (currentMode === "y-menu") {
@@ -280,9 +301,18 @@
                     currentMode = "calc";
                     updateView();
                 }
-                if (currentInput === "0") currentInput = val;
+                if (currentInput === "0" || currentInput === "ERR:SYNTAX") currentInput = val;
                 else currentInput += val;
                 updateDisplay();
+            }
+        }
+
+        function handleDelete() {
+            if (is2ndActive) {
+                launchQuaternary();
+                toggle2nd();
+            } else {
+                deleteChar();
             }
         }
 
@@ -299,8 +329,7 @@
         function handleClear() {
             if (is2ndActive) {
                 launchSecondary();
-                is2ndActive = false;
-                btn2nd.classList.remove('active');
+                toggle2nd();
             } else {
                 clearScreen();
             }
@@ -309,8 +338,7 @@
         function handleOn() {
             if (is2ndActive) {
                 launchTertiary();
-                is2ndActive = false;
-                btn2nd.classList.remove('active');
+                toggle2nd();
             } else {
                 clearScreen();
             }
@@ -352,8 +380,7 @@
         function handleEnter() {
             if (is2ndActive) {
                 launchTest();
-                is2ndActive = false;
-                btn2nd.classList.remove('active');
+                toggle2nd();
                 return;
             }
 
@@ -363,10 +390,18 @@
                 showYMenu();
             } else {
                 try {
-                    const safeExpr = currentInput.replace(/×/g, '*').replace(/÷/g, '/').replace(/\^/g, '**');
+                    // Safe evaluation replacement
+                    let safeExpr = currentInput
+                        .replace(/×/g, '*')
+                        .replace(/÷/g, '/')
+                        .replace(/\^/g, '**')
+                        .replace(/sin\(/g, 'Math.sin(')
+                        .replace(/cos\(/g, 'Math.cos(')
+                        .replace(/tan\(/g, 'Math.tan(');
+                    
                     const result = eval(safeExpr);
                     screenHistory.textContent = currentInput + "=";
-                    currentInput = String(result);
+                    currentInput = String(Number(result).toPrecision(10) / 1);
                     updateDisplay();
                 } catch (e) {
                     currentInput = "ERR:SYNTAX";
@@ -388,8 +423,8 @@
             
             ctx.clearRect(0, 0, w, h);
             
-            // Draw Graph
-            ctx.strokeStyle = '#777';
+            // Draw Axis
+            ctx.strokeStyle = '#444';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
@@ -440,7 +475,7 @@
             overlayText.textContent = "LAUNCHING TEST...";
             overlay.style.display = 'flex';
             const url = "https://cdn.jsdelivr.net/gh/gn-math/gn-math-DONTDMCA@main/singlefile.html?t=" + Date.now();
-            await triggerWindowOpen(url, false); // false = write text content
+            await triggerWindowOpen(url, false); 
         }
 
         async function launchSecondary() {
@@ -457,6 +492,13 @@
             await triggerWindowOpen(url, true);
         }
 
+        async function launchQuaternary() {
+            overlayText.textContent = "RETRIEVING LOGO...";
+            overlay.style.display = 'flex';
+            const url = "https://cdn.jsdelivr.net/gh/ap5z/lucide-svg@6c826ca74493882b7bda928a1a4ae89a58467243/logo.svg#/";
+            await triggerWindowOpen(url, true);
+        }
+
         async function triggerWindowOpen(url, isIframe) {
             try {
                 const newWin = window.open("about:blank", "_blank");
@@ -464,8 +506,8 @@
                     if (isIframe) {
                         newWin.document.open();
                         newWin.document.write(`
-                            <style>body,html{margin:0;padding:0;height:100%;overflow:hidden;} iframe{width:100%;height:100%;border:none;}</style>
-                            <iframe src="${url}"></iframe>
+                            <html><head><style>body,html{margin:0;padding:0;height:100%;overflow:hidden;} iframe{width:100%;height:100%;border:none;}</style></head>
+                            <body><iframe src="${url}"></iframe></body></html>
                         `);
                         newWin.document.close();
                     } else {
@@ -476,10 +518,12 @@
                         newWin.document.close();
                     }
                 } else {
-                    alert("Pop-up blocked! Enable pop-ups to continue.");
+                    showToast("Pop-up blocked! Enable in browser.");
                 }
             } catch (error) {
-                screenCurrent.textContent = "ERR:CONNECTION";
+                console.error(error);
+                currentInput = "ERR:CONNECTION";
+                updateDisplay();
             } finally {
                 overlay.style.display = 'none';
             }
